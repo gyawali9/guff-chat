@@ -4,9 +4,12 @@ import App from "./App.tsx";
 
 import "./index.css";
 import "./assets/styles/icon.css";
+import { Providers } from "@/providers";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <App />
+    <Providers>
+      <App />
+    </Providers>
   </StrictMode>
 );
