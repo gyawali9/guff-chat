@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import { connectDB } from "./src/db";
 import userRouter from "./src/routes/user.route";
 import { errorMiddleware } from "./src/middlewares/error.middleware";
+import messageRouter from "./src/routes/message.route";
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ const port = process.env.PORT || 5001;
 // routes
 // import userRoute from "./routes/user.route.js";
 app.use("/api/v1/auth", userRouter);
+app.use("/api/v1/message", messageRouter);
 
 // error handling middle at end
 app.use(errorMiddleware);

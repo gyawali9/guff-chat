@@ -1,14 +1,22 @@
 import { Schema, Types, model } from "mongoose";
 
-const messageSchema = new Schema(
+interface Message {
+  senderId: Types.ObjectId;
+  receiverId: Types.ObjectId;
+  message: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+const messageSchema = new Schema<Message>(
   {
     senderId: {
-      type: Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
     receiverId: {
-      type: Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
@@ -20,4 +28,5 @@ const messageSchema = new Schema(
   { timestamps: true }
 );
 
-export default model("Message", messageSchema);
+const Message = model<Message>("Message", messageSchema);
+export default Message;
