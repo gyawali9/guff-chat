@@ -4,13 +4,13 @@ const conversationSchema = new Schema(
   {
     participants: [
       {
-        type: Schema.Types.ObjectId,
+        type: Types.ObjectId,
         ref: "User",
       },
     ],
     messages: [
       {
-        type: Schema.Types.ObjectId,
+        type: Types.ObjectId,
         ref: "Message",
       },
     ],
