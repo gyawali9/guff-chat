@@ -13,7 +13,20 @@ dotenv.config();
 const app = express();
 
 // middleware setup
-app.use(cors());
+const whitelistedOrigins = ["http://localhost:5173", process.env.FRONTEND_URL!];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || whitelistedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 
 app.use(
   express.json({
