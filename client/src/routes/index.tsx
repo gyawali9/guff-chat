@@ -3,6 +3,7 @@ import Login from "../pages/authentication/Login";
 import Signup from "../pages/authentication/Signup";
 import AuthLayout from "@/components/layouts/AuthLayout";
 import DashboardLayout from "@/components/layouts/UserLayout";
+import { ProtectedRoutes } from "./ProtectedRoutes";
 
 export const routes = [
   {
@@ -10,7 +11,11 @@ export const routes = [
     children: [
       {
         path: "/",
-        element: <Home />,
+        element: (
+          <ProtectedRoutes>
+            <Home />
+          </ProtectedRoutes>
+        ),
       },
     ],
   },

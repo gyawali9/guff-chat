@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
-import { z } from "zod";
+// import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { OctagonAlertIcon, ArrowLeftIcon } from "lucide-react";
+import { ArrowLeftIcon, Loader2Icon } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -15,11 +15,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Alert, AlertTitle } from "@/components/ui/alert";
+// import { Alert, AlertTitle } from "@/components/ui/alert";
 import { useNavigate } from "react-router-dom";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { getSignupSchema } from "../../schemas";
+import type { SignUpType } from "../../types";
+import { useAppDispatch, useAppSelector } from "@/hooks/react-redux";
+import { registerUserThunk } from "@/store/slice/user/user.thunk";
 
 // const step1Schema = z
 //   .object({
@@ -49,15 +52,17 @@ import { getSignupSchema } from "../../schemas";
 // });
 
 const SignupView = () => {
-  const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState<boolean>(false);
+  // const [error, setError] = useState<string | null>(null);
+  // const [pending, setPending] = useState<boolean>(false);
   const [signUpStep, setSignUpStep] = useState<1 | 2>(1);
 
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { buttonLoading } = useAppSelector((state) => state.user);
 
   const schema = useMemo(() => getSignupSchema(signUpStep), [signUpStep]);
 
-  const form = useForm<z.infer<ReturnType<typeof getSignupSchema>>>({
+  const form = useForm<SignUpType>({
     resolver: zodResolver(schema),
     defaultValues: {
       fullName: "",
@@ -69,9 +74,7 @@ const SignupView = () => {
     },
   });
 
-  console.log(form.formState.errors, "whatareerrors");
-  const onSubmit = async (values: z.infer<typeof schema>) => {
-    console.log(values, "whatisvalues");
+  const onSubmit = async (value: SignUpType) => {
     if (signUpStep === 1) {
       const isStep1Valid = await form.trigger([
         "fullName",
@@ -85,19 +88,9 @@ const SignupView = () => {
       }
       return;
     }
-
-    try {
-      setPending(true);
-      console.log("Sending values to API:", values);
-      // await api.signup(values);
-      // navigate("/login");
-    } catch (err: any) {
-      const error = err;
-      const errorMessage =
-        error.response?.data?.message || "Signup failed. Try again.";
-      setError(errorMessage);
-    } finally {
-      setPending(false);
+    const res = await dispatch(registerUserThunk(value));
+    if (res?.meta?.requestStatus === "fulfilled") {
+      navigate("/login");
     }
   };
 
@@ -252,20 +245,21 @@ const SignupView = () => {
                   </>
                 )}
 
-                {!!error && (
+                {/* {!!error && (
                   <Alert className="bg-destructive/10 border-none">
                     <OctagonAlertIcon className="h-4 w-4 !item-destructive" />
                     <AlertTitle>{error}</AlertTitle>
                   </Alert>
-                )}
+                )} */}
                 {/* <Button disabled={pending} type="submit" className="w-full">
                   Sign up
                 </Button> */}
                 <Button
                   className="cursor-pointer w-full"
-                  disabled={pending}
+                  disabled={buttonLoading}
                   type="submit"
                 >
+                  {buttonLoading && <Loader2Icon className="animate-spin" />}
                   {signUpStep === 1 ? "Next" : "Sign Up"}
                 </Button>
                 <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:items-center after:border-t"></div>
@@ -274,7 +268,7 @@ const SignupView = () => {
                   Already have an account?{" "}
                   <span
                     onClick={() => navigate("/login")}
-                    className="underline underline-offset-4"
+                    className="underline underline-offset-4 cursor-pointer"
                   >
                     Login
                   </span>

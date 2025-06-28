@@ -1,8 +1,5 @@
-import { useState } from "react";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { OctagonAlertIcon } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -15,37 +12,38 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Alert, AlertTitle } from "@/components/ui/alert";
 import { useNavigate } from "react-router-dom";
-
-const formSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1, { message: "Password is required" }),
-});
+import { signInSchema } from "@/modules/auth/schemas";
+import { loginUserThunk } from "@/store/slice/user/user.thunk";
+import type { SignInType } from "../../types";
+import { useAppDispatch, useAppSelector } from "@/hooks/react-redux";
+import { Loader2Icon } from "lucide-react";
 
 const LoginView = () => {
-  const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState<boolean>(false);
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { buttonLoading } = useAppSelector((state) => state.user);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<SignInType>({
+    resolver: zodResolver(signInSchema),
     defaultValues: {
-      email: "",
+      userName: "",
       password: "",
     },
   });
-  // temp console
-  console.log(setError, setPending);
+
+  const onSubmit = async (value: SignInType) => {
+    const res = await dispatch(loginUserThunk(value));
+    if (res?.meta?.requestStatus === "fulfilled") {
+      navigate("/");
+    }
+  };
   return (
     <div className="flex flex-col gap-6">
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
           <Form {...form}>
-            <form
-              // onSubmit={form.handleSubmit(onSubmit)}
-              className="p-6 md:p-8"
-            >
+            <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 md:p-8">
               <div className="flex flex-col gap-6">
                 <div className="flex flex-col items-center text-center">
                   <h1 className="text-2xl font-bold">Welcome back</h1>
@@ -56,14 +54,14 @@ const LoginView = () => {
                 <div className="grid gap-3">
                   <FormField
                     control={form.control}
-                    name="email"
+                    name="userName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email</FormLabel>
+                        <FormLabel>User Name</FormLabel>
                         <FormControl>
                           <Input
-                            type="email"
-                            placeholder="eg@example.com"
+                            type="text"
+                            placeholder="eg@username"
                             {...field}
                           ></Input>
                         </FormControl>
@@ -91,22 +89,23 @@ const LoginView = () => {
                     )}
                   />
                 </div>
-                {!!error && (
-                  <Alert className="bg-destructive/10 border-none">
-                    <OctagonAlertIcon className="h-4 w-4 !item-destructive" />
-                    <AlertTitle>{error}</AlertTitle>
-                  </Alert>
-                )}
-                <Button disabled={pending} type="submit" className="w-full">
+
+                <Button
+                  disabled={buttonLoading}
+                  type="submit"
+                  className="cursor-pointer w-full"
+                >
+                  {buttonLoading && <Loader2Icon className="animate-spin" />}
                   Sign In
                 </Button>
+
                 <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:items-center after:border-t"></div>
 
                 <div className="text-center text-sm">
                   Don&apos;t have an account?{" "}
                   <span
                     onClick={() => navigate("/signup")}
-                    className="underline underline-offset-4"
+                    className="underline underline-offset-4 cursor-pointer"
                   >
                     Sign up
                   </span>
