@@ -89,16 +89,16 @@ export const register = asyncHandler(
 
 export const login = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { username, password } = req.body;
+    const { userName, password } = req.body;
 
     // check if user has registered
-    if (!username || !password) {
+    if (!userName || !password) {
       return next(
         new ErrorHandler(400, "Please enter a valid username or password")
       );
     }
 
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ userName }).select("+password");
     if (!user) {
       return next(
         new ErrorHandler(400, "Please enter a valid username or password")
@@ -150,11 +150,11 @@ export const getProfile = asyncHandler(async (req: Request, res: Response) => {
 
 export const logout = asyncHandler(async (req: Request, res: Response) => {
   res
-    .status(200)
-    .cookie("token", "", {
+    .clearCookie("refreshToken", {
       expires: new Date(Date.now()),
       httpOnly: true,
     })
+    .status(200)
     .json({
       success: true,
       message: "Logout successful!",
@@ -164,8 +164,7 @@ export const logout = asyncHandler(async (req: Request, res: Response) => {
 
 export const getOtherUsers = asyncHandler(
   async (req: Request, res: Response) => {
-    const currentUserId = (req as any).user._id; // Again, type properly for production
-
+    const currentUserId = (req as any).user._id;
     const otherUsers = await User.find({ _id: { $ne: currentUserId } });
 
     res.status(200).json({
