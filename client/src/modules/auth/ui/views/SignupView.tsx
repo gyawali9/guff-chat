@@ -1,59 +1,19 @@
 import { useMemo, useState } from "react";
-// import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeftIcon, Loader2Icon } from "lucide-react";
 
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-// import { Alert, AlertTitle } from "@/components/ui/alert";
-import { useNavigate } from "react-router-dom";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
+import { Form, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { getSignupSchema } from "../../schemas";
 import type { SignUpType } from "../../types";
 import { useAppDispatch, useAppSelector } from "@/hooks/react-redux";
 import { registerUserThunk } from "@/store/slice/user/user.thunk";
-
-// const step1Schema = z
-//   .object({
-//     fullName: z.string().min(1, { message: "Name is required" }),
-//     userName: z.string().min(1, { message: "Username is required" }),
-//     password: z.string().min(1, { message: "Password is required" }),
-//     confirmPassword: z.string().min(1, { message: "Password is required" }),
-//     gender: z.enum(["M", "F"], { message: "Gender is required" }),
-//     bio: z.string().min(1, { message: "Bio is required" }),
-//   })
-//   .refine((data) => data.password === data.confirmPassword, {
-//     message: "Password doesn't match",
-//     path: ["confirmPassword"],
-//   })
-//   .refine((data) => {
-//     if (data.step === 2) {
-//       return !!data.bio?.trim();
-//     }
-//     return true;
-//   }, {
-//     message: "Bio is required",
-//     path: ["bio"],
-//   });
-
-//   const fullSchema = step1Schema.extend({
-//   bio: z.string().min(1, { message: "Bio is required" }),
-// });
+import FormInput from "@/components/ui/form/FormInput";
 
 const SignupView = () => {
-  // const [error, setError] = useState<string | null>(null);
-  // const [pending, setPending] = useState<boolean>(false);
   const [signUpStep, setSignUpStep] = useState<1 | 2>(1);
 
   const navigate = useNavigate();
@@ -114,16 +74,16 @@ const SignupView = () => {
                       <FormField
                         control={form.control}
                         name="fullName"
-                        render={({ field }) => (
+                        render={({ field, fieldState }) => (
                           <FormItem>
-                            <FormLabel>Full Name</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="text"
-                                placeholder="eg: John Doe"
-                                {...field}
-                              ></Input>
-                            </FormControl>
+                            <FormInput
+                              type="text"
+                              label="Full Name"
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="eg@fullName"
+                              error={fieldState.error?.message}
+                            />
                             <FormMessage />
                           </FormItem>
                         )}
@@ -133,16 +93,16 @@ const SignupView = () => {
                       <FormField
                         control={form.control}
                         name="userName"
-                        render={({ field }) => (
+                        render={({ field, fieldState }) => (
                           <FormItem>
-                            <FormLabel>User Name</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="text"
-                                placeholder="eg: John Doe"
-                                {...field}
-                              ></Input>
-                            </FormControl>
+                            <FormInput
+                              type="text"
+                              label="User Name"
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="eg@fullName"
+                              error={fieldState.error?.message}
+                            />
                             <FormMessage />
                           </FormItem>
                         )}
@@ -152,16 +112,16 @@ const SignupView = () => {
                       <FormField
                         control={form.control}
                         name="password"
-                        render={({ field }) => (
+                        render={({ field, fieldState }) => (
                           <FormItem>
-                            <FormLabel>Password</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="password"
-                                placeholder="eg: *****"
-                                {...field}
-                              ></Input>
-                            </FormControl>
+                            <FormInput
+                              type="password"
+                              label="Password"
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="********"
+                              error={fieldState.error?.message}
+                            />
                             <FormMessage />
                           </FormItem>
                         )}
@@ -171,16 +131,16 @@ const SignupView = () => {
                       <FormField
                         control={form.control}
                         name="confirmPassword"
-                        render={({ field }) => (
+                        render={({ field, fieldState }) => (
                           <FormItem>
-                            <FormLabel>Confirm Password</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="password"
-                                placeholder="eg: *****"
-                                {...field}
-                              ></Input>
-                            </FormControl>
+                            <FormInput
+                              type="password"
+                              label="Confirm Password"
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="********"
+                              error={fieldState.error?.message}
+                            />
                             <FormMessage />
                           </FormItem>
                         )}
@@ -190,25 +150,19 @@ const SignupView = () => {
                       <FormField
                         control={form.control}
                         name="gender"
-                        render={({ field }) => (
+                        render={({ field, fieldState }) => (
                           <FormItem>
-                            <FormLabel>Gender</FormLabel>
-                            <FormControl>
-                              <RadioGroup
-                                onValueChange={field.onChange}
-                                defaultValue={field.value}
-                                className="flex space-x-4"
-                              >
-                                <div className="flex items-center space-x-2">
-                                  <RadioGroupItem value="M" id="male" />
-                                  <Label htmlFor="male">Male</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <RadioGroupItem value="F" id="female" />
-                                  <Label htmlFor="female">Female</Label>
-                                </div>
-                              </RadioGroup>
-                            </FormControl>
+                            <FormInput
+                              type="radio"
+                              label="Gender"
+                              value={field.value}
+                              onChange={field.onChange}
+                              options={[
+                                { label: "Male", value: "M" },
+                                { label: "Female", value: "F" },
+                              ]}
+                              error={fieldState.error?.message}
+                            />
                             <FormMessage />
                           </FormItem>
                         )}
@@ -220,16 +174,16 @@ const SignupView = () => {
                     <FormField
                       control={form.control}
                       name="bio"
-                      render={({ field }) => (
+                      render={({ field, fieldState }) => (
                         <FormItem>
-                          <FormLabel>Bio</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="text"
-                              placeholder="Tell us something about yourself..."
-                              {...field}
-                            />
-                          </FormControl>
+                          <FormInput
+                            type="textarea"
+                            label="Bio"
+                            value={field.value ?? ""}
+                            onChange={field.onChange}
+                            placeholder="Tell us something about yourself..."
+                            error={fieldState.error?.message}
+                          />
                           <FormMessage />
                         </FormItem>
                       )}

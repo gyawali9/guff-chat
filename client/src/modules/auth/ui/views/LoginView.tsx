@@ -1,23 +1,17 @@
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { Loader2Icon } from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { useNavigate } from "react-router-dom";
+import { Form, FormField, FormItem, FormMessage } from "@/components/ui/form";
+
 import { signInSchema } from "@/modules/auth/schemas";
 import { loginUserThunk } from "@/store/slice/user/user.thunk";
 import type { SignInType } from "../../types";
 import { useAppDispatch, useAppSelector } from "@/hooks/react-redux";
-import { Loader2Icon } from "lucide-react";
+import FormInput from "@/components/ui/form/FormInput";
 
 const LoginView = () => {
   const navigate = useNavigate();
@@ -55,16 +49,16 @@ const LoginView = () => {
                   <FormField
                     control={form.control}
                     name="userName"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
-                        <FormLabel>User Name</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="text"
-                            placeholder="eg@username"
-                            {...field}
-                          ></Input>
-                        </FormControl>
+                        <FormInput
+                          type="text"
+                          label="Full Name"
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="eg@fullName"
+                          error={fieldState.error?.message}
+                        />
                         <FormMessage />
                       </FormItem>
                     )}
@@ -74,16 +68,16 @@ const LoginView = () => {
                   <FormField
                     control={form.control}
                     name="password"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="password"
-                            placeholder="********"
-                            {...field}
-                          ></Input>
-                        </FormControl>
+                        <FormInput
+                          type="password"
+                          label="Password"
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="********"
+                          error={fieldState.error?.message}
+                        />
                         <FormMessage />
                       </FormItem>
                     )}
