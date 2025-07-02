@@ -1,15 +1,25 @@
 import type { CustomAxiosRequestConfig, ErrorResponse } from "@/types/api";
 import axios, { AxiosError } from "axios";
 import toast from "react-hot-toast";
+
+// Define backend URL based on environment
 const backendUrl =
   import.meta.env.MODE !== "development"
     ? import.meta.env.VITE_BACKEND_URL
     : "http://localhost:5001/api/v1";
 
+//  Axios instance
 export const httpClient = axios.create({
   baseURL: backendUrl,
   withCredentials: true,
 });
+
+// Centralized logout utility
+const logoutAndRedirect = () => {
+  localStorage.removeItem("token");
+  toast.error("Session expired. Please log in again.");
+  window.location.href = "/login";
+};
 
 // Axios interceptor to attach token
 httpClient.interceptors.request.use((config) => {
@@ -20,7 +30,7 @@ httpClient.interceptors.request.use((config) => {
   return config;
 });
 
-// ✅ Response interceptor for token refresh & global errors
+// Response interceptor for token refresh & global errors
 httpClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<ErrorResponse>) => {
@@ -28,8 +38,9 @@ httpClient.interceptors.response.use(
     const apiError = error.response?.data;
 
     const isAccessTokenExpired =
-      error.response?.status === 401 && apiError?.message === "Token expired";
+      error.response?.status === 401 && apiError?.message === "jwt expired";
 
+    //  Handle expired access token by attempting refresh
     if (isAccessTokenExpired && !originalRequest?._retry) {
       originalRequest._retry = true;
 
@@ -46,24 +57,18 @@ httpClient.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${newToken}`;
         }
 
+        // Retry original request with new token
         return httpClient(originalRequest);
       } catch (refreshError) {
-        toast.error("Session expired. Please log in again.");
-        localStorage.removeItem("token");
-        window.location.href = "/login";
+        logoutAndRedirect();
         return Promise.reject(refreshError);
       }
     }
 
     // Other unauthorized cases
-    if (
-      error.response?.status === 401 &&
-      (apiError?.message === "Invalid token" ||
-        apiError?.message === "Unauthorized")
-    ) {
-      toast.error("Invalid session. Please log in again.");
-      localStorage.removeItem("token");
-      window.location.href = "/login";
+    // Handle all other unauthorized errors
+    if (error.response?.status === 401) {
+      logoutAndRedirect();
     }
 
     // ✅ Global error logging

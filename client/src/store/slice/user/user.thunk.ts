@@ -29,7 +29,7 @@ const getUserProfile = () =>
   );
 
 const getOtherUsersProfile = () =>
-  httpClient.get<APIResponse<AuthResponseUserData<IUser>>>(
+  httpClient.get<APIResponse<AuthResponseUserData<IUser[]>>>(
     API_ENDPOINTS.OTHER_USERS_PROFILE
   );
 

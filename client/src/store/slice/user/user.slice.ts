@@ -11,11 +11,13 @@ import type { IUser } from "@/modules/auth/types";
 
 interface AuthState {
   authUser: IUser | null;
-  otherUsers: IUser | null;
+  otherUsers: IUser[] | null;
   token: string | null;
   buttonLoading: boolean;
   screenLoading: boolean;
+  sideBarLoading: boolean;
   error: string | null;
+  selectedUser: IUser | null;
 }
 
 const initialState: AuthState = {
@@ -23,14 +25,20 @@ const initialState: AuthState = {
   otherUsers: null,
   token: localStorage.getItem("token"),
   buttonLoading: false,
-  screenLoading: false,
+  screenLoading: true,
+  sideBarLoading: false,
   error: null,
+  selectedUser: null,
 };
 
 export const userSlice = createSlice({
   name: "user",
   initialState,
-  reducers: {},
+  reducers: {
+    setSelectedUser: (state, action) => {
+      state.selectedUser = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     // login
     builder.addCase(loginUserThunk.pending, (state) => {
@@ -51,8 +59,8 @@ export const userSlice = createSlice({
         action
       ) => {
         state.buttonLoading = false;
-        state.authUser = null;
-        state.token = null;
+        // state.authUser = null;
+        // state.token = null;
 
         const errorMessage =
           (action.payload as { message?: string })?.message || "Login faileddd";
@@ -81,8 +89,8 @@ export const userSlice = createSlice({
         action
       ) => {
         state.buttonLoading = false;
-        state.authUser = null;
-        state.token = null;
+        // state.authUser = null;
+        // state.token = null;
 
         const errorMessage =
           (action.payload as { message?: string })?.message ||
@@ -130,7 +138,7 @@ export const userSlice = createSlice({
     });
     builder.addCase(getUserProfileThunk.fulfilled, (state, action) => {
       state.screenLoading = false;
-      state.otherUsers = action.payload.data.user;
+      state.authUser = action.payload.data.user;
       state.error = null;
     });
     builder.addCase(
@@ -154,10 +162,10 @@ export const userSlice = createSlice({
 
     // other users profile
     builder.addCase(getOtherUsersThunk.pending, (state) => {
-      state.screenLoading = true;
+      state.sideBarLoading = true;
     });
     builder.addCase(getOtherUsersThunk.fulfilled, (state, action) => {
-      state.screenLoading = false;
+      state.sideBarLoading = false;
       state.otherUsers = action.payload.data.user;
       state.error = null;
     });
@@ -169,7 +177,7 @@ export const userSlice = createSlice({
         state,
         action
       ) => {
-        state.screenLoading = false;
+        state.sideBarLoading = false;
 
         const errorMessage =
           (action.payload as { message?: string })?.message ||

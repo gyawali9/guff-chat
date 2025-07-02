@@ -1,7 +1,4 @@
-// import Link from "next/link";
-// import Image from "next/image";
-// import { usePathname } from "next/navigation";
-import { BotIcon, StarIcon, VideoIcon } from "lucide-react";
+import { StarIcon } from "lucide-react";
 
 import {
   Sidebar,
@@ -20,19 +17,9 @@ import { cn } from "@/lib/utils";
 import { useLocation } from "react-router-dom";
 import { DashboardUserButton } from "./DashboardUserButton";
 import { Link } from "react-router-dom";
-
-const firstSection = [
-  {
-    icon: VideoIcon,
-    label: "Meetings",
-    href: "/meetings",
-  },
-  {
-    icon: BotIcon,
-    label: "Agents",
-    href: "/agents",
-  },
-];
+import { useAppSelector } from "@/hooks/react-redux";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { GeneratedAvatar } from "@/components/generated-avatar";
 
 const secondSection = [
   {
@@ -45,6 +32,9 @@ const secondSection = [
 export const DashboardSidebar = () => {
   const location = useLocation();
   const pathname = location.pathname;
+
+  const { otherUsers } = useAppSelector((state) => state.user);
+
   return (
     <Sidebar>
       <SidebarHeader className="text-sidebar-accent-foreground">
@@ -62,23 +52,33 @@ export const DashboardSidebar = () => {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {firstSection.map((item) => (
-                <SidebarMenuItem key={item.href}>
+              {otherUsers?.map((item) => (
+                <SidebarMenuItem className="py-[2px]" key={item._id}>
                   <SidebarMenuButton
                     asChild
-                    className={cn(
-                      "h-10 hover:bg-linear-to-r/oklch border border-transparent hover:border-[#5D6B68]/10 from-sidebar-accent from-5% via-sidebar/50 to-sidebar/50",
-                      pathname === item.href &&
-                        "bg-linear-to-r/oklch border-[#5D6B68]/10"
-                    )}
-                    isActive={pathname === item.href}
+                    className="h-14 cursor-pointer bg-muted hover:bg-white"
                   >
-                    <Link to={item.href}>
-                      <item.icon className="size-5" />
-                      <span className="text-sm font-medium tracking-tight">
-                        {item.label}
-                      </span>
-                    </Link>
+                    <div>
+                      {item?.profilePic !== "" ? (
+                        <Avatar>
+                          <AvatarImage src={item.profilePic} />
+                        </Avatar>
+                      ) : (
+                        <GeneratedAvatar
+                          seed={item.fullName}
+                          variant="initials"
+                          className="size-9 mr-2"
+                        />
+                      )}
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold tracking-tight">
+                          {item.fullName}
+                        </span>
+                        <span className="text-sm font-sm font- tracking-tight">
+                          {item.userName}
+                        </span>
+                      </div>
+                    </div>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
